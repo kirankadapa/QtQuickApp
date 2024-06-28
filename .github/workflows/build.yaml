@@ -23,19 +23,24 @@ jobs:
         if: matrix.os == 'windows-latest'
       
       - name: Install Qt
-        run: |
-          $pythonArchiveUrl = "https://github.com/actions/python-versions/releases/download/3.11.9-9667582339/python-3.11.9-win32-x64.zip"
-          $downloadPath = "$env:TEMP\python-archive.zip"
-          Invoke-WebRequest -Uri $pythonArchiveUrl -OutFile $downloadPath
-          Expand-Archive -Path $downloadPath -DestinationPath "$env:TEMP\python-3.11.9" -Force
-        shell: pwsh
-        if: matrix.os == 'windows-latest'
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.5.2'
         
       - uses: ilammy/msvc-dev-cmd@v1
       
       - uses: actions/checkout@v3
 
-      - name: Build
-        run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Debug
+      - name: Configure and Build
+        run: |
+          cmake -S . -B build -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH=/path/to/Qt6
+          cmake --build build --config Debug
+        shell: bash
+        if: matrix.os == 'ubuntu-latest'
+      
+      - name: Configure and Build
+        run: |
+          cmake -S . -B build -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH=C:\path\to\Qt6
+          cmake --build build --config Debug
         shell: cmd
         if: matrix.os == 'windows-latest'
