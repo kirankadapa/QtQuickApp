@@ -22,15 +22,16 @@ jobs:
         shell: cmd
         if: matrix.os == 'windows-latest'
       
-      - name: Install Qt
+      - name: Download and Extract Qt
         run: |
-          $qtArchiveUrl = "URL_TO_YOUR_QT_ARCHIVE"  # Replace with actual URL
-          $downloadPath = "$env:TEMP\qt-archive"
-          Invoke-WebRequest -Uri $qtArchiveUrl -OutFile $downloadPath
-          Expand-Archive -Path $downloadPath -DestinationPath "$env:TEMP\qt-installation" -Force
+          $pythonArchiveUrl = "https://github.com/actions/python-versions/releases/download/3.11.9-9667582339/python-3.11.9-win32-x64.zip"
+          $downloadPath = "$env:TEMP\python-archive.zip"
+          Invoke-WebRequest -Uri $pythonArchiveUrl -OutFile $downloadPath
+          Expand-Archive -Path $downloadPath -DestinationPath "$env:TEMP\python-3.11.9" -Force
         shell: cmd
       
       - uses: ilammy/msvc-dev-cmd@v1
+      
       - uses: actions/checkout@v3
 
       - name: Build
