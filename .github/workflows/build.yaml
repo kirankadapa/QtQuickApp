@@ -10,27 +10,30 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-    - name: Install dependencies (linux)
-      run: sudo apt install ninja-build
-      if: matrix.os == 'ubuntu-latest'
+      - name: Install dependencies (linux)
+        run: sudo apt install ninja-build
+        if: matrix.os == 'ubuntu-latest'
       
-    - name: Install Chocolatey and Ninja (windows)
-      run: |
-        @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
-        SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-        choco install ninja -y
-      shell: cmd
-      if: matrix.os == 'windows-latest'
+      - name: Install Chocolatey and Ninja (windows)
+        run: |
+          @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+          SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+          choco install ninja -y
+        shell: cmd
+        if: matrix.os == 'windows-latest'
       
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '6.5.2'
-        
-    - uses: ilammy/msvc-dev-cmd@v1
-    - uses: actions/checkout@v3
+      - name: Install Qt
+        run: |
+          $qtArchiveUrl = "URL_TO_YOUR_QT_ARCHIVE"  # Replace with actual URL
+          $downloadPath = "$env:TEMP\qt-archive"
+          Invoke-WebRequest -Uri $qtArchiveUrl -OutFile $downloadPath
+          Expand-Archive -Path $downloadPath -DestinationPath "$env:TEMP\qt-installation" -Force
+        shell: cmd
+      
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/checkout@v3
 
-    - name: Build
-      run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Debug
-      shell: cmd
-      if: matrix.os == 'windows-latest'
+      - name: Build
+        run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Debug
+        shell: cmd
+        if: matrix.os == 'windows-latest'
