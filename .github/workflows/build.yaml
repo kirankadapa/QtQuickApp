@@ -28,7 +28,7 @@ jobs:
           $downloadPath = "$env:TEMP\python-archive.zip"
           Invoke-WebRequest -Uri $pythonArchiveUrl -OutFile $downloadPath
           Expand-Archive -Path $downloadPath -DestinationPath "$env:TEMP\python-3.11.9" -Force
-        shell: cmd
+        shell: powershell
         if: matrix.os == 'windows-latest'
         
       - uses: ilammy/msvc-dev-cmd@v1
