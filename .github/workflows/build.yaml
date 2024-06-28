@@ -1,46 +1,31 @@
 name: CI
 
-on: push
-
+on: push # when to trigger this. Here, on every push
 jobs:
   build_and_test:
     name: "Build and test"
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+        os: [ubuntu-latest, windows-latest] # we build on GitHub-provided Windows and Linux images
+    runs-on: ${{ matrix.os }} # use value from the matrix
     steps:
-      - name: Install dependencies (linux)
-        run: sudo apt install ninja-build
-        if: matrix.os == 'ubuntu-latest'
-      
-      - name: Install Chocolatey and Ninja (windows)
-        run: |
-          @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
-          SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-          choco install ninja -y
-        shell: cmd
-        if: matrix.os == 'windows-latest'
-      
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: '6.5.2'
-        
-      - uses: ilammy/msvc-dev-cmd@v1
-      
-      - uses: actions/checkout@v3
+    - name: Install dependencies (linux)
+      run: sudo apt install ninja-build
+      if: matrix.os == 'ubuntu-latest' # conditional, runs this step only on the Ubuntu runner
+    - name: Install Ninja (windows)    # Ninja is not available in GitHub-provided images,
+                                       # see https://github.com/actions/runner-images/issues/514
+      run: choco install ninja         # So let's install it through Chocolatey
+      if: matrix.os == 'windows-latest'
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '6.5.2'
+    - uses: ilammy/msvc-dev-cmd@v1 # This action essentially calls vcvarsall.bat for the latest VS in the runner for x64
+    - uses: actions/checkout@v3    # Actually check out the sources. GH Actions can run for events that may not require
+                                   # sources (e.g. when someone comments on an issue)
 
-      - name: Configure and Build
-        run: |
-          cmake -S . -B build -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH=/path/to/Qt6
-          cmake --build build --config Debug
-        shell: bash
-        if: matrix.os == 'ubuntu-latest'
-      
-      - name: Configure and Build
-        run: |
-          cmake -S . -B build -G "Ninja Multi-Config" -DCMAKE_PREFIX_PATH=C:\path\to\Qt6
-          cmake --build build --config Debug
-        shell: cmd
-        if: matrix.os == 'windows-latest'
+    # Here we call CMake manually, there are solutions for that in the Marketplace: https://github.com/marketplace/actions/run-cmake
+    - name: Build
+      # We don't need to set up the environment variable for CMake to see Qt because the install-qt-action
+      # sets up the necessary variables automatically
+      run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Debug
