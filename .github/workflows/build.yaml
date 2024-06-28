@@ -14,17 +14,11 @@ jobs:
       run: sudo apt install ninja-build
       if: matrix.os == 'ubuntu-latest'
       
-    - name: Install Chocolatey (windows)
+    - name: Install Chocolatey and Ninja (windows)
       run: |
-        Set-ExecutionPolicy Bypass -Scope Process -Force; 
-        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; 
-        iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-      shell: powershell
-      if: matrix.os == 'windows-latest'
-      
-    - name: Install Ninja (windows)
-      run: choco install ninja -y
-      shell: powershell
+        @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+        choco install ninja -y
+      shell: cmd
       if: matrix.os == 'windows-latest'
       
     - name: Install Qt
@@ -37,3 +31,5 @@ jobs:
 
     - name: Build
       run: cmake -S . -B build -G "Ninja Multi-Config" && cmake --build build --config Debug
+      shell: cmd
+      if: matrix.os == 'windows-latest'
