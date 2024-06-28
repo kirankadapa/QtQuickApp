@@ -16,6 +16,8 @@ jobs:
                                        # see https://github.com/actions/runner-images/issues/514
       run: choco install ninja         
       if: matrix.os == 'windows-latest'
+    - name: Set PowerShell Execution Policy (windows)
+      run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
     - name: Install Qt
       uses: jurplel/install-qt-action@v3
       with:
