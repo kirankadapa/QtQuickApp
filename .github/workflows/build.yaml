@@ -22,13 +22,13 @@ jobs:
         shell: cmd
         if: matrix.os == 'windows-latest'
       
-      - name: Download and Extract Qt
+      - name: Install Qt
         run: |
           $pythonArchiveUrl = "https://github.com/actions/python-versions/releases/download/3.11.9-9667582339/python-3.11.9-win32-x64.zip"
           $downloadPath = "$env:TEMP\python-archive.zip"
           Invoke-WebRequest -Uri $pythonArchiveUrl -OutFile $downloadPath
           Expand-Archive -Path $downloadPath -DestinationPath "$env:TEMP\python-3.11.9" -Force
-        shell: powershell
+        shell: pwsh
         if: matrix.os == 'windows-latest'
         
       - uses: ilammy/msvc-dev-cmd@v1
