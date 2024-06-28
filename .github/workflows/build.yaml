@@ -14,13 +14,10 @@ jobs:
       run: sudo apt install ninja-build
       if: matrix.os == 'ubuntu-latest'
       
-    - name: Set PowerShell Execution Policy (windows)
-      run: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
-      shell: powershell
-      if: matrix.os == 'windows-latest'
-      
-    - name: Install Ninja (windows)
-      run: choco install ninja
+    - name: Install Ninja and set execution policy (windows)
+      run: |
+        powershell.exe -command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force"
+        choco install ninja
       if: matrix.os == 'windows-latest'
       
     - name: Install Qt
